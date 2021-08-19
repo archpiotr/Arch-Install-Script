@@ -39,7 +39,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 cat << EOF > /mnt/root/install.sh 
 	echo -e "\n" | pacman -Syu
-	echo -e "\n" | pacman -S grub efibootmgr vim networkmanager
+	echo -e "\n" | pacman -S grub efibootmgr vim networkmanager git base-devel xf86-video-fbdev xorg-server xorg-xinit xorg-fonts libxft libxinerama
 
 	ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 	hwclock --systohc
@@ -56,6 +56,29 @@ cat << EOF > /mnt/root/install.sh
 
 	grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 	grub-mkconfig -o /boot/grub/grub.cfg
+
+	systemctl enable NetworkManager
+
+	useradd -m -g users -G wheel piotr
+
+	git clone git://git.suckless.org/dwm
+
+	cd dwm
+
+	make clean install
+
+	cd ..
+	
+	git clone git://git.suckless.org/st
+
+	cd st
+
+	make clean install
+
+	echo exec dwm > /home/piotr/.xinitrc
+
+	su piotr
+	
 EOF
 
 chmod +x /mnt/root/install.sh
