@@ -19,6 +19,12 @@ n
 w
 EOF
 
+partition=$disk
+partition+="2"
+
+mkfs.ext4 $partition
+mount $partition /mnt
+
 mkdir /mnt/boot
 
 efi=$disk
@@ -26,12 +32,6 @@ efi+="1"
 
 mkfs.vfat -F32 $efi
 mount $efi /mnt/boot
-
-partition=$disk
-partition+="2"
-
-mkfs.ext4 $partition
-mount $partition /mnt
 
 pacstrap /mnt base linux linux-firmware
 
