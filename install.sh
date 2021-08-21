@@ -3,6 +3,11 @@ fdisk -l
 printf "Wybierz dysk: "
 read disk
 
+uefi_check=/sys/firmware/efi
+
+if [ -d "$file" ]; then
+
+#uefi
 fdisk $disk <<EOF
 g
 n
@@ -33,13 +38,34 @@ efi+="1"
 mkfs.vfat -F32 $efi
 mount $efi /mnt/boot
 
+else
+
+#legacy
+
+fdisk $disk <<EOF
+o
+n
+
+
+
+w
+EOF
+
+partition=$disk
+$partition+="1"
+
+mkfs.ext4 $partition
+mount $partition /mnt
+
+fi
+
 pacstrap /mnt base linux linux-firmware
 
 genfstab -U /mnt >> /mnt/etc/fstab
 
 cat << EOF > /mnt/root/install.sh 
 	echo -e "\n" | pacman -Syu
-	echo -e "\n" | pacman -S grub efibootmgr vim networkmanager git base-devel xf86-video-fbdev xorg-server xorg-xinit xorg-fonts libxft libxinerama
+	echo -e "\n\n\n" | pacman -S grub efibootmgr vim networkmanager git base-devel xf86-video-fbdev xorg-server xorg-xinit xorg-fonts libxft libxinerama
 
 	ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 	hwclock --systohc
@@ -54,7 +80,18 @@ cat << EOF > /mnt/root/install.sh
 
 	echo -e "admin\nadmin" | passwd
 
+	uefi_check=/sys/firmware/efi
+
+	if [ -d "$file" ]; then
+
 	grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+
+	else
+
+	grub-install --target=i386-pc $disk
+
+	fi
+
 	grub-mkconfig -o /boot/grub/grub.cfg
 
 	systemctl enable NetworkManager
