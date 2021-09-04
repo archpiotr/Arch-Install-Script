@@ -5,7 +5,7 @@ read disk
 
 uefi_check=/sys/firmware/efi
 
-if [ -d "$file" ]; then
+if [ -d "$uefi_check" ]; then
 
 #uefi
 fdisk $disk <<EOF
@@ -65,7 +65,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 cat << EOF > /mnt/root/install.sh 
 	echo -e "\n" | pacman -Syu
-	echo -e "\n\n\n" | pacman -S grub efibootmgr vim networkmanager git base-devel xf86-video-fbdev xorg-server xorg-xinit xorg-fonts libxft libxinerama
+	echo -e "\n\n\n" | pacman -S grub efibootmgr vim networkmanager git base-devel xf86-video-fbdev xorg-server xorg-xinit xorg-fonts ttf-hack libxft libxinerama
 
 	ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 	hwclock --systohc
@@ -80,9 +80,7 @@ cat << EOF > /mnt/root/install.sh
 
 	echo -e "admin\nadmin" | passwd
 
-	uefi_check=/sys/firmware/efi
-
-	if [ -d "$file" ]; then
+	if [ -d "uefi_check=/sys/firmware/efi" ]; then
 
 	grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 
@@ -97,6 +95,11 @@ cat << EOF > /mnt/root/install.sh
 	systemctl enable NetworkManager
 
 	useradd -m -g users -G wheel piotr
+
+	mkdir /home/piotr/Documents
+	mkdir /home/piotr/Documents/suckless
+
+	cd /home/piotr/Documents/suckless
 
 	git clone git://git.suckless.org/dwm
 
@@ -114,7 +117,7 @@ cat << EOF > /mnt/root/install.sh
 
 	echo exec dwm > /home/piotr/.xinitrc
 
-	su piotr
+	chown -R piotr:users /home/piotr/
 	
 EOF
 
