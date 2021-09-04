@@ -64,8 +64,12 @@ pacstrap /mnt base linux linux-firmware
 genfstab -U /mnt >> /mnt/etc/fstab
 
 cat << EOF > /mnt/root/install.sh 
+	# Installtion required packages
+
 	echo -e "\n" | pacman -Syu
 	echo -e "\n\n\n" | pacman -S grub efibootmgr vim networkmanager git base-devel xf86-video-fbdev xorg-server xorg-xinit xorg-fonts ttf-hack libxft libxinerama
+
+	# Editing configuration files
 
 	ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 	hwclock --systohc
@@ -78,7 +82,7 @@ cat << EOF > /mnt/root/install.sh
 	echo ::1 		localhost >> /etc/hosts
 	echo 127.0.1.1		archpiotr.localdomain archpiotr >> /etc/hosts
 
-	echo -e "admin\nadmin" | passwd
+	# Installing GRUB bootloader
 
 	if [ -d "/sys/firmware/efi" ]; then
 
@@ -92,7 +96,11 @@ cat << EOF > /mnt/root/install.sh
 
 	grub-mkconfig -o /boot/grub/grub.cfg
 
+	# Enabling NetworkManager
+
 	systemctl enable NetworkManager
+
+	# Adding user
 
 	useradd -m -g users -G wheel piotr
 
@@ -120,10 +128,14 @@ cat << EOF > /mnt/root/install.sh
 	echo exec dwm > /home/piotr/.xinitrc
 
 	chown -R piotr:users /home/piotr/
-	
+
+	# Changing passwords
+
+	echo -e "admin\nadmin" | passwd
+	echo -e "admin\nadmin" | passwd piotr
 EOF
 
 chmod +x /mnt/root/install.sh
 
 arch-chroot /mnt /root/install.sh
-arch-chroot /mnt
+reboot
