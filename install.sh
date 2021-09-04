@@ -80,13 +80,13 @@ cat << EOF > /mnt/root/install.sh
 
 	echo -e "admin\nadmin" | passwd
 
-	if [ -d "uefi_check=/sys/firmware/efi" ]; then
+	if [ -d "/sys/firmware/efi" ]; then
 
-	grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+	grub-install --target=x86_64-efi --efi-directory=/boot --force --bootloader-id=GRUB
 
 	else
 
-	grub-install --target=i386-pc $disk
+	grub-install --target=i386-pc --force $disk
 
 	fi
 
@@ -95,6 +95,8 @@ cat << EOF > /mnt/root/install.sh
 	systemctl enable NetworkManager
 
 	useradd -m -g users -G wheel piotr
+
+	# Installing suckless stuff
 
 	mkdir /home/piotr/Documents
 	mkdir /home/piotr/Documents/suckless
